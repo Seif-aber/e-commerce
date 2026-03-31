@@ -5,6 +5,10 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Categories available from the Platzi API
+  const categories = ['All', 'Clothes', 'Electronics', 'Furniture', 'Shoes', 'Miscellaneous'];
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -58,11 +62,35 @@ const Home = () => {
     fetchProducts();
   }, []);
 
+  // Filter products based on selected category
+  const filteredProducts = selectedCategory === 'All' 
+    ? products 
+    : products.filter(product => product.category.name === selectedCategory);
+
   return (
     <div className="w-full px-4 md:px-8 lg:px-12 py-10">
       <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white mb-10 text-center">
         Discover Our Collection
       </h2>
+
+      {/* Category Filter Buttons */}
+      {!isLoading && !error && (
+        <div className="flex flex-wrap gap-3 mb-8 justify-center">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-5 py-2 rounded-full font-semibold transition-all duration-200 ${
+                selectedCategory === category
+                  ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
 
       {isLoading && (
         <div className="flex justify-center items-center h-64">
@@ -81,7 +109,7 @@ const Home = () => {
 
       {!isLoading && !error && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
+          {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
