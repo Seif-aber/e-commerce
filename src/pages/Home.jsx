@@ -9,12 +9,45 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://fakestoreapi.com/products');
+        const response = await fetch('https://api.escuelajs.co/api/v1/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
-        setProducts(data);
+        
+        // Sanitize and filter products to remove junk data from user-generated API
+        const cleanedData = data
+          .filter((product) => {
+            // Validate title: must be at least 4 characters
+            if (!product.title || product.title.length < 4) return false;
+            
+            // Exclude keyboard-smash test strings
+            const junkPatterns = /\b(test|asdf|dsad|ffs|qwer)\b/i;
+            if (junkPatterns.test(product.title)) return false;
+            
+            // Validate images array exists and has at least one item
+            if (!product.images || !Array.isArray(product.images) || product.images.length === 0) {
+              return false;
+            }
+            
+            const imageUrl = product.images[0];
+            if (!imageUrl) return false;
+            
+            // Exclude placeholder and generic images
+            const placeholderPatterns = /placeholder|any|600x400|placeimg/i;
+            if (placeholderPatterns.test(imageUrl)) return false;
+            
+            return true;
+          })
+          .reduce((uniqueProducts, product) => {
+            // Remove duplicates based on title (case-insensitive)
+            if (!uniqueProducts.find(p => p.title.toLowerCase() === product.title.toLowerCase())) {
+              uniqueProducts.push(product);
+            }
+            return uniqueProducts;
+          }, []);
+        
+        setProducts(cleanedData);
       } catch (err) {
         setError(err.message);
       } finally {

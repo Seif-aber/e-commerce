@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
       */}
       <div className="bg-white p-6 h-64 flex justify-center items-center relative overflow-hidden">
         <img
-          src={product.image}
+          src={product.images[0] || 'https://via.placeholder.com/300'}
           alt={product.title}
           className="object-contain h-full w-full group-hover:scale-105 transition-transform duration-300"
         />
@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
       {/* Content Container */}
       <div className="p-5 flex flex-col flex-grow text-left">
         <span className="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider mb-2">
-          {product.category}
+          {product.category.name}
         </span>
         
         <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 line-clamp-2">
