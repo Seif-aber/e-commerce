@@ -7,51 +7,20 @@ const Home = () => {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Categories available from the Platzi API
-  const categories = ['All', 'Clothes', 'Electronics', 'Furniture', 'Shoes', 'Miscellaneous'];
+  // Dynamically generate categories from fetched products
+  const categories = ['All', ...new Set(products.map(product => product.category))];
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch('https://api.escuelajs.co/api/v1/products');
+        const response = await fetch('https://dummyjson.com/products');
         if (!response.ok) {
           throw new Error('Failed to fetch products');
         }
         const data = await response.json();
         
-        // Sanitize and filter products to remove junk data from user-generated API
-        const cleanedData = data
-          .filter((product) => {
-            // Validate title: must be at least 4 characters
-            if (!product.title || product.title.length < 4) return false;
-            
-            // Exclude keyboard-smash test strings
-            const junkPatterns = /\b(test|asdf|dsad|ffs|qwer)\b/i;
-            if (junkPatterns.test(product.title)) return false;
-            
-            // Validate images array exists and has at least one item
-            if (!product.images || !Array.isArray(product.images) || product.images.length === 0) {
-              return false;
-            }
-            
-            const imageUrl = product.images[0];
-            if (!imageUrl) return false;
-            
-            // Exclude placeholder and generic images
-            const placeholderPatterns = /placeholder|any|600x400|placeimg/i;
-            if (placeholderPatterns.test(imageUrl)) return false;
-            
-            return true;
-          })
-          .reduce((uniqueProducts, product) => {
-            // Remove duplicates based on title (case-insensitive)
-            if (!uniqueProducts.find(p => p.title.toLowerCase() === product.title.toLowerCase())) {
-              uniqueProducts.push(product);
-            }
-            return uniqueProducts;
-          }, []);
-        
-        setProducts(cleanedData);
+        // DummyJSON data is already clean
+        setProducts(data.products);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -65,7 +34,7 @@ const Home = () => {
   // Filter products based on selected category
   const filteredProducts = selectedCategory === 'All' 
     ? products 
-    : products.filter(product => product.category.name === selectedCategory);
+    : products.filter(product => product.category === selectedCategory);
 
   return (
     <div className="w-full px-4 md:px-8 lg:px-12 py-10">
